@@ -1,6 +1,6 @@
 module github.com/a-h/minio-upload
 
-go 1.21.5
+go 1.20
 
 require github.com/minio/minio-go/v7 v7.0.67
 

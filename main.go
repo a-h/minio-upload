@@ -16,16 +16,37 @@ import (
 
 var accessKeyIDFlag = flag.String("access-key-id", "", "The minio access key ID.")
 var secretAccessKeyFileFlag = flag.String("secret-access-key-file", "", "The file to load the minio secret access key from.")
-var bucketNameFlag = flag.String("bucket-name", "", "The name of the minio bucket to use.")
+var bucketNameFlag = flag.String("bucket", "", "The name of the minio bucket to use.")
 var endpointFlag = flag.String("endpoint", "", "The minio endpoint to use.")
-var fileToUploadFlag = flag.String("file-to-upload", "", "The file to upload.")
+var fileToUploadFlag = flag.String("file", "", "The file to upload.")
 
 func main() {
-	flag.Parse()
 	loggingLevel := new(slog.LevelVar)
 	log := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: loggingLevel, AddSource: true}))
 	slog.SetDefault(log)
 	loggingLevel.Set(slog.LevelDebug)
+
+	flag.Parse()
+	var missingFlags []string
+	if *accessKeyIDFlag == "" {
+		missingFlags = append(missingFlags, "access-key-id")
+	}
+	if *secretAccessKeyFileFlag == "" {
+		missingFlags = append(missingFlags, "secret-access-key-file")
+	}
+	if *bucketNameFlag == "" {
+		missingFlags = append(missingFlags, "bucket")
+	}
+	if *endpointFlag == "" {
+		missingFlags = append(missingFlags, "endpoint")
+	}
+	if *fileToUploadFlag == "" {
+		missingFlags = append(missingFlags, "file")
+	}
+	if len(missingFlags) > 0 {
+		log.Error("missing required flags", slog.Any("flags", missingFlags))
+		os.Exit(1)
+	}
 
 	// Create minio client.
 	t := http.DefaultTransport
